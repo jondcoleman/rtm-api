@@ -1,8 +1,17 @@
+const fs = require('fs');
 const axios = require('axios')
 const jsonfile = require('jsonfile')
 const createSignedUrl = require('./createSignedUrl')
+const dir = './tmp';
+
+if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+}
+
+jsonfile.spaces = 2
 
 const baseUrl = 'https://api.rememberthemilk.com/services/rest/'
+const fileName = `${dir}/tasks.json`
 
 function retrieveToken(callback) {
   jsonfile.readFile('./authStore.json', 'utf-8', (err, obj) => callback(obj.token))
@@ -21,7 +30,9 @@ function getTasks(token) {
       if (rsp.stat === 'fail') {
         console.error(`Error: ${JSON.stringify(rsp.err, null, 2)}`)
       } else {
-        console.log(res.data.rsp.tasks.list[0].taskseries)
+        // const tasks = rsp.tasks.list[0].taskseries
+        const tasks = rsp.tasks
+        jsonfile.writeFile(fileName, tasks, (err) => console.log(err || `Saved to ${fileName}`))
       }
     })
     .catch(err => console.error(err))
